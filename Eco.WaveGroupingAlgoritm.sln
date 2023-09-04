@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34003.232
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eco.WaveGroupingAlgoritm", "Eco.WaveGroupingAlgoritm.csproj", "{66D5D4D9-58A2-4EA4-8DE8-50A924D302AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eco.WaveGroupingAlgoritm2D", "Eco.WaveGroupingAlgoritm2D\Eco.WaveGroupingAlgoritm2D.csproj", "{66D5D4D9-58A2-4EA4-8DE8-50A924D302AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
