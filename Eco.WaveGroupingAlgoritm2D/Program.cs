@@ -7,19 +7,19 @@ class Program
     {
 
         int worldXSize = 128;
-        int worldYSize = 128;
+        int worldYSize = 16;
 
         // Создание объекта Memory 
         int worldSize = worldXSize * worldYSize;
         int worldByteSize = worldSize / 8;
-        var memoryArray = new byte[worldSize];
+        var memoryArray = new byte[worldByteSize];
         var world = new Memory<byte>(memoryArray);
 
         // Заполнение объекта memory случайными значениями
         var random = new Random();
         random.NextBytes(memoryArray);
         //заполним нижнюю строку единицами
-        for (int i = worldByteSize - (worldYSize / 8); i < worldByteSize; i++)
+        for (int i = worldByteSize - (worldXSize / 8); i < worldByteSize; i++)
         {
             memoryArray[i] = 0xFF;
         }
