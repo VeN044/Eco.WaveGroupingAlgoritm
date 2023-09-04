@@ -8,6 +8,7 @@ class Program
 
         int worldXSize = 128;
         int worldYSize = 16;
+        bool dontPrintMemory = false;
 
         // Создание объекта world 
         int worldSize = worldXSize * worldYSize;
@@ -27,45 +28,43 @@ class Program
 
         //содание объекта mask
         var maskMemoryArray = new byte[worldByteSize];
-        var mask = new Memory<byte>(worldMemoryArray);
+        var mask = new Memory<byte>(maskMemoryArray);
+        //заполним нижнюю строку world единицами
+        for (int i = worldByteSize - worldLineSize; i < worldByteSize; i++)
+        {
+            maskMemoryArray[i] = 0xFF;
+        }
 
         // Вывод содержимого memory  
-        Console.WriteLine("Исходная память:");
-        PrintMemoryInBlocks(world.Span, worldXSize);
+        Console.WriteLine("Исходный world:");
+        if(!dontPrintMemory) PrintMemoryInBlocks(world.Span, worldXSize);
 
+        // Вывод содержимого mask  
+        Console.WriteLine("Исходный mask:");
+        if (!dontPrintMemory) PrintMemoryInBlocks(mask.Span, worldXSize);
 
+        GroupingWaveMain(world, mask);
 
-
-        // Ротация бит влево на 1 бит для каждого блока 
-        int blockBitSize = 128;
-        int blockByteSize = blockBitSize / 8;
-
-        for (int i = 0; i <= worldByteSize - blockByteSize; i += blockByteSize)
-        {
-            var block = world.Slice(i, blockByteSize);
-            RotateBitsLeft(block.Span);
-        }
 
         // Вывод содержимого memory блоками 
         Console.WriteLine("Измененная память:");
-        PrintMemoryInBlocks(world.Span, worldXSize);
+        if (!dontPrintMemory) PrintMemoryInBlocks(world.Span, worldXSize);
     }
 
-
-    static void RotateBitsLeft(Span<byte> data)
+    static void GroupingWaveMain(Memory<byte> world, Memory<byte> mask)
     {
-        byte carry = (byte)(data[data.Length - 1] >> 7);
 
-        for (int i = data.Length - 1; i > 0; i--)
+    }
+
+    static void ApplyMaskToWorld(Memory<byte> world, Memory<byte> mask)
+    {
+        Span<byte> worldSpan = world.Span;
+        Span<byte> maskSpan = mask.Span;
+
+        for (int i = 0; i < worldSpan.Length; i++)
         {
-            byte current = data[i];
-            byte shifted = (byte)((current << 1) | (data[i - 1] >> 7));
-            data[i] = shifted;
+            worldSpan[i] &= maskSpan[i];
         }
-
-        byte first = data[0];
-        byte rotated = (byte)((first << 1) | carry);
-        data[0] = rotated;
     }
 
     static void PrintMemoryInBlocks(ReadOnlySpan<byte> data, int blockBitSize)
