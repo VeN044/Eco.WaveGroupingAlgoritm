@@ -9,9 +9,9 @@ class Program
         int worldXSize = 128;
         int worldYSize = 128;
         // Создание объекта Memory 
-        int bitSize = worldXSize * worldYSize;
-        int byteSize = bitSize / 8;
-        var memoryArray = new byte[byteSize];
+        int worldSize = worldXSize * worldYSize;
+        int worldByteSize = worldSize / 8;
+        var memoryArray = new byte[worldSize];
         var world = new Memory<byte>(memoryArray);
 
         // Заполнение объекта memory случайными значениями
@@ -26,7 +26,7 @@ class Program
         Console.WriteLine("Исходная память:");
         PrintMemoryInBlocks(world.Span, blockBitSize);
 
-        for (int i = 0; i <= byteSize - blockByteSize; i += blockByteSize)
+        for (int i = 0; i <= worldByteSize - blockByteSize; i += blockByteSize)
         {
             var block = world.Slice(i, blockByteSize);
             RotateBitsLeft(block.Span);
