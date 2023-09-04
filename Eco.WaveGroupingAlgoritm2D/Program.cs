@@ -9,28 +9,36 @@ class Program
         int worldXSize = 128;
         int worldYSize = 16;
 
-        // Создание объекта Memory 
+        // Создание объекта world 
         int worldSize = worldXSize * worldYSize;
         int worldByteSize = worldSize / 8;
-        var memoryArray = new byte[worldByteSize];
-        var world = new Memory<byte>(memoryArray);
+        int worldLineSize = worldXSize / 8;
+        var worldMemoryArray = new byte[worldByteSize];
+        var world = new Memory<byte>(worldMemoryArray);
 
         // Заполнение объекта memory случайными значениями
         var random = new Random();
-        random.NextBytes(memoryArray);
-        //заполним нижнюю строку единицами
-        for (int i = worldByteSize - (worldXSize / 8); i < worldByteSize; i++)
+        random.NextBytes(worldMemoryArray);
+        //заполним нижнюю строку world единицами
+        for (int i = worldByteSize - worldLineSize; i < worldByteSize; i++)
         {
-            memoryArray[i] = 0xFF;
+            worldMemoryArray[i] = 0xFF;
         }
+
+        //содание объекта mask
+        var maskMemoryArray = new byte[worldByteSize];
+        var mask = new Memory<byte>(worldMemoryArray);
+
+        // Вывод содержимого memory  
+        Console.WriteLine("Исходная память:");
+        PrintMemoryInBlocks(world.Span, worldXSize);
+
+
+
 
         // Ротация бит влево на 1 бит для каждого блока 
         int blockBitSize = 128;
         int blockByteSize = blockBitSize / 8;
-
-        // Вывод содержимого memory блоками 
-        Console.WriteLine("Исходная память:");
-        PrintMemoryInBlocks(world.Span, blockBitSize);
 
         for (int i = 0; i <= worldByteSize - blockByteSize; i += blockByteSize)
         {
@@ -40,7 +48,7 @@ class Program
 
         // Вывод содержимого memory блоками 
         Console.WriteLine("Измененная память:");
-        PrintMemoryInBlocks(world.Span, blockBitSize);
+        PrintMemoryInBlocks(world.Span, worldXSize);
     }
 
 
