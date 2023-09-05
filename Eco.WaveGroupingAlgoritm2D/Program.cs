@@ -26,23 +26,13 @@ class Program
         Console.WriteLine("Исходный world:");
         if (!dontPrintMemory) PrintMemoryInBlocks(world.memory.Span, worldXSize);
 
-
-        //содание объекта mask
-        var maskMemoryArray = new bool[worldXSize * worldYSize];
-        var mask = new Memory<bool>(maskMemoryArray);
-        //заполним нижнюю строку world единицами
-        for (int i = worldXSize * worldYSize - worldXSize; i < worldXSize * worldYSize; i++)
-        {
-            maskMemoryArray[i] = true;
-        }
-
+        //инициализируем и запустим алгоритм
+        WaveAlgorithm algorithm = new WaveAlgorithm(worldXSize, worldYSize);
+        algorithm.CalculateMask();
 
         // Вывод содержимого mask  
         Console.WriteLine("Исходный mask:");
-        if (!dontPrintMemory) PrintMemoryInBlocks(mask.Span, worldXSize);
-
-        GroupingWaveMain(world.memory, mask);
-
+        if (!dontPrintMemory) PrintMemoryInBlocks(algorithm.mask.Span, worldXSize);
 
         // Вывод содержимого memory блоками 
         Console.WriteLine("Измененная память:");
@@ -135,6 +125,39 @@ class Program
             }
         }
 
+
+    }
+
+    public class WaveAlgorithm
+    {
+        public int maskSizeX;
+        public int maskSizeY;
+        public int maskSize;
+
+        public bool[] maskMemoryArray;
+        public Memory<bool> mask;
+
+        public WaveAlgorithm (int maskSizeX, int maskSizeY)
+        {
+            this.maskSizeX = maskSizeX;
+            this.maskSizeY = maskSizeY;
+            this.maskSize = maskSizeX * maskSizeY;
+            this.maskMemoryArray = new bool[maskSizeX * maskSizeY];
+            this.mask = new Memory<bool>(maskMemoryArray);
+        }
+
+        public void AddBedrockToMask()
+        {
+            for (int i = maskSize - maskSizeX; i < maskSize; i++)
+            {
+                maskMemoryArray[i] = true;
+            }
+        }
+
+        public void CalculateMask()
+        {
+            this.AddBedrockToMask();
+        }
 
     }
 
