@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Xml.Linq;
+using static Program;
 
 class Program
 {
@@ -13,52 +14,58 @@ class Program
         bool dontPrintMemory = false;
 
         // Создание объекта world 
-        int worldSize = worldXSize * worldYSize;
-        var worldMemoryArray = new bool[worldSize];
-        var world = new Memory<bool>(worldMemoryArray);
+        World world = new World(worldXSize, worldYSize);
 
         // Заполнение объекта memory случайными значениями
-        var random = new Random();
-        for (int i = 0; i < worldSize; i++)
-        {
-            bool randomValue = random.Next(2) == 0; // Генерация случайного значения true/false
+        world.Randomize();
 
-            world.Span[i] = randomValue;
-        }
         //заполним нижнюю строку world единицами
-        for (int i = worldSize - worldXSize; i < worldSize; i++)
-        {
-            worldMemoryArray[i] = true;
-        }
+        world.CreateBedrock();
+
+        // Вывод содержимого memory  
+        Console.WriteLine("Исходный world:");
+        if (!dontPrintMemory) PrintMemoryInBlocks(world.memory.Span, worldXSize);
+
 
         //содание объекта mask
-        var maskMemoryArray = new bool[worldSize];
+        var maskMemoryArray = new bool[worldXSize * worldYSize];
         var mask = new Memory<bool>(maskMemoryArray);
         //заполним нижнюю строку world единицами
-        for (int i = worldSize - worldXSize; i < worldSize; i++)
+        for (int i = worldXSize * worldYSize - worldXSize; i < worldXSize * worldYSize; i++)
         {
             maskMemoryArray[i] = true;
         }
 
-        // Вывод содержимого memory  
-        Console.WriteLine("Исходный world:");
-        if(!dontPrintMemory) PrintMemoryInBlocks(world.Span, worldXSize);
 
         // Вывод содержимого mask  
         Console.WriteLine("Исходный mask:");
         if (!dontPrintMemory) PrintMemoryInBlocks(mask.Span, worldXSize);
 
-        GroupingWaveMain(world, mask);
+        GroupingWaveMain(world.memory, mask);
 
 
         // Вывод содержимого memory блоками 
         Console.WriteLine("Измененная память:");
-        if (!dontPrintMemory) PrintMemoryInBlocks(world.Span, worldXSize);
+        if (!dontPrintMemory) PrintMemoryInBlocks(world.memory.Span, worldXSize);
     }
 
     static void GroupingWaveMain(Memory<bool> world, Memory<bool> mask)
     {
+        //Цикл по обходу расчета
+        //Сдвиг маски вверх
+        Span<bool> worldSpan = world.Span;
+        Span<bool> maskSpan = mask.Span;
+        Span<bool> shiftMaskSpan = mask.Span;
 
+        for (int i = 0; i < worldSpan.Length; i++)
+        {
+            var Value = false;
+            int x = i % 128;
+            int y = i / 128;
+        }
+        //Сдвиг маски влево
+        //Сдвиг маски вниз
+        //Сдвиг маски вправо
     }
 
     static void ApplyMaskToWorld(Memory<bool> world, Memory<bool> mask)
@@ -90,5 +97,59 @@ class Program
             binaryString.Append(block[i] ? "1" : "0");
         }
         Console.Write(binaryString.ToString());
+    }
+
+    public class World
+    {
+        public bool[] worldMemoryArray;
+        public Memory<bool> memory;
+
+        public int worldSizeX;
+        public int worldSizeY;
+        public int worldSize;
+
+        public World(int sizeX, int sizeY)
+        {
+            this.worldSizeX = sizeX;
+            this.worldSizeY = sizeY;
+            this.worldSize = worldSizeX * worldSizeY;
+
+            this.worldMemoryArray = new bool[worldSize];
+            this.memory = new Memory<bool>(worldMemoryArray);
+        }
+        public void Randomize()
+        {
+            var random = new Random();
+            for (int i = 0; i < worldSize; i++)
+            {
+                bool randomValue = random.Next(2) == 0; // Генерация случайного значения true/false
+                memory.Span[i] = randomValue;
+            }
+        }
+
+        public void CreateBedrock()
+        {
+            for (int i = worldSize - worldSizeX; i < worldSize; i++)
+            {
+                worldMemoryArray[i] = true;
+            }
+        }
+
+
+    }
+
+    public class coordinateHelper
+    {
+        int worldSizeX;
+        int worldsizeY;
+
+        public coordinateHelper(int worldSizeX, int worldsizeY)
+        {
+            this.worldSizeX = worldSizeX;
+            this.worldsizeY = worldsizeY;
+        }
+
+
+
     }
 }
