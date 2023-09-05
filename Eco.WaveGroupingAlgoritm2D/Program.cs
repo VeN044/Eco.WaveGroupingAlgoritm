@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Xml.Linq;
+using System.Diagnostics;
 using static Program;
 
 class Program
@@ -10,8 +11,11 @@ class Program
     {
 
         int worldXSize = 128;
-        int worldYSize = 16;
-        bool dontPrintMemory = false;
+        int worldYSize = 32;
+        bool dontPrintMemory = (worldXSize > 129)? true : false ;
+
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
 
         // Создание объекта world 
         World world = new World(worldXSize, worldYSize);
@@ -22,13 +26,23 @@ class Program
         //заполним нижнюю строку world единицами
         world.CreateBedrock();
 
+        stopwatch.Stop();
+
         // Вывод содержимого memory  
         Console.WriteLine("Исходный world:");
         if (!dontPrintMemory) PrintMemoryInBlocks(world.memory.Span, worldXSize);
 
+        Console.WriteLine("Мир " + worldXSize + "x" + worldYSize + "=" + (worldXSize * worldYSize) + " готов за " + stopwatch.ElapsedMilliseconds + "мс. Нажмите любую кнопку для начала расчета...");
+        Console.ReadKey();
+
+        stopwatch.Reset();
+        stopwatch.Start();
+
         //инициализируем и запустим алгоритм
         WaveAlgorithm algorithm = new WaveAlgorithm(worldXSize, worldYSize);
         algorithm.CalculateMask(world);
+
+        Console.WriteLine("Маска рассчитана за " + stopwatch.ElapsedMilliseconds + "мс. \n");
 
         // Вывод содержимого mask  
         Console.WriteLine("Измененная mask:");
@@ -41,6 +55,10 @@ class Program
         // Вывод содержимого memory блоками 
         Console.WriteLine("world через анти-mask:");
         if (!dontPrintMemory) PrintMemoryThroughtMask(world.memory.Span, algorithm.mask.Span, worldXSize, true);
+
+        Console.WriteLine("Нажмите любую кнопку для завершения программы.");
+        Console.ReadKey();
+
     }
 
     static void PrintMemoryThroughtMask(ReadOnlySpan<bool> data, ReadOnlySpan<bool> mask, int blockSize, bool invertmask = false)
@@ -213,21 +231,21 @@ class Program
     public class coordinateHelper
     {
         int worldSizeX;
-        int worldsizeY;
+        int worldSizeY;
 
         public coordinateHelper(int worldSizeX, int worldsizeY)
         {
             this.worldSizeX = worldSizeX;
-            this.worldsizeY = worldsizeY;
+            this.worldSizeY = worldsizeY;
         }
 
         public int GetUp(int flatCoordinate)
         {
-            int x = (flatCoordinate) % 128;
-            int y = (flatCoordinate) / 128;
+            int x = (flatCoordinate) % worldSizeX;
+            int y = (flatCoordinate) / worldSizeX;
 
             y--;
-            if (y >= worldsizeY || y < 0)
+            if (y >= worldSizeY || y < 0)
                 return -1;
 
             return y * worldSizeX + x;
@@ -235,32 +253,33 @@ class Program
 
         public int GetDown(int flatCoordinate)
         {
-            int x = (flatCoordinate) % 128;
-            int y = (flatCoordinate) / 128;
+            int x = (flatCoordinate) % worldSizeX;
+            int y = (flatCoordinate) / worldSizeX;
 
             y++;
-            if (y >= worldsizeY || y < 0)
+            if (y >= worldSizeY || y < 0)
                 return -1;
 
             return y * worldSizeX + x;
         }
         public int GetLeft(int flatCoordinate)
         {
-            int x = (flatCoordinate) % 128;
-            int y = (flatCoordinate) / 128;
+            int x = (flatCoordinate) % worldSizeX;
+            int y = (flatCoordinate) / worldSizeX;
 
+            if (x == 0) x = worldSizeX;
             x--;
-            if (x < 0) x += worldSizeX;
+            
 
             return y * worldSizeX + x;
         }
         public int GetRight(int flatCoordinate)
         {
-            int x = (flatCoordinate) % 128;
-            int y = (flatCoordinate) / 128;
+            int x = (flatCoordinate) % worldSizeX;
+            int y = (flatCoordinate) / worldSizeX;
 
             x++;
-            if (x >= worldSizeX) x =0;
+            if (x >= worldSizeX) x = 0;
 
             return y * worldSizeX + x;
         }
