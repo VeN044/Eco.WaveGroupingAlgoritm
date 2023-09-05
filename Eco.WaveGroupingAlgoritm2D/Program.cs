@@ -35,27 +35,29 @@ class Program
         if (!dontPrintMemory) PrintMemoryInBlocks(algorithm.mask.Span, worldXSize);
 
         // Вывод содержимого memory блоками 
-        Console.WriteLine("Измененная world:");
-        if (!dontPrintMemory) PrintMemoryInBlocks(world.memory.Span, worldXSize);
+        Console.WriteLine("world через mask:");
+        if (!dontPrintMemory) PrintMemoryThroughtMask(world.memory.Span, algorithm.mask.Span, worldXSize, false);
+
+        // Вывод содержимого memory блоками 
+        Console.WriteLine("world через анти-mask:");
+        if (!dontPrintMemory) PrintMemoryThroughtMask(world.memory.Span, algorithm.mask.Span, worldXSize, true);
     }
 
-    static void GroupingWaveMain(Memory<bool> world, Memory<bool> mask)
+    static void PrintMemoryThroughtMask(ReadOnlySpan<bool> data, ReadOnlySpan<bool> mask, int blockSize, bool invertmask = false)
     {
-        //Цикл по обходу расчета
-        //Сдвиг маски вверх
-        Span<bool> worldSpan = world.Span;
-        Span<bool> maskSpan = mask.Span;
-        Span<bool> shiftMaskSpan = mask.Span;
-
-        for (int i = 0; i < worldSpan.Length; i++)
+        for (int i = 0; i < data.Length; i += blockSize)
         {
-            var Value = false;
-            int x = i % 128;
-            int y = i / 128;
+            var block = data.Slice(i, Math.Min(blockSize, data.Length - i));
+            var maskBlock = mask.Slice(i, Math.Min(blockSize, data.Length - i));
+            var binaryString = new StringBuilder();
+            for (int a = 0; a < block.Length; a++)
+            {
+                bool value = invertmask ? (block[a] && !maskBlock[a]) : (block[a] && maskBlock[a]);
+                binaryString.Append(value ? "#" : " ");
+            }
+            Console.Write(binaryString.ToString());
+            Console.WriteLine(); // Добавлен перевод строки между блоками
         }
-        //Сдвиг маски влево
-        //Сдвиг маски вниз
-        //Сдвиг маски вправо
     }
 
     static void PrintMemoryInBlocks(ReadOnlySpan<bool> data, int blockSize)
@@ -73,7 +75,7 @@ class Program
         var binaryString = new StringBuilder();
         for (int i = 0; i < block.Length; i++)
         {
-            binaryString.Append(block[i] ? "1" : "0");
+            binaryString.Append(block[i] ? "#" : " ");
         }
         Console.Write(binaryString.ToString());
     }
@@ -157,7 +159,7 @@ class Program
             for (int t = 0; t < 15; t++)
             {
 
-
+                //смотрим по смещение вверх
                 for (int i = 0; i < worldSpan.Length; i++)
                 {
                     if (worldSpan[i] && maskSpan[i]
@@ -167,7 +169,39 @@ class Program
                         int coordinate = coo.GetUp(i);
                         maskSpan[coo.GetUp(i)] = true;
                     }
-                    //worldSpan[i] &= maskSpan[i];
+                }
+                //смотрим по смещение влево
+                for (int i = 0; i < worldSpan.Length; i++)
+                {
+                    if (worldSpan[i] && maskSpan[i]
+                        && (coo.GetLeft(i) >= 0)
+                        )
+                    {
+                        int coordinate = coo.GetLeft(i);
+                        maskSpan[coo.GetLeft(i)] = true;
+                    }
+                }
+                //смотрим по смещение вниз
+                for (int i = 0; i < worldSpan.Length; i++)
+                {
+                    if (worldSpan[i] && maskSpan[i]
+                        && (coo.GetDown(i) >= 0)
+                        )
+                    {
+                        int coordinate = coo.GetDown(i);
+                        maskSpan[coo.GetDown(i)] = true;
+                    }
+                }
+                //смотрим по смещение вправо
+                for (int i = 0; i < worldSpan.Length; i++)
+                {
+                    if (worldSpan[i] && maskSpan[i]
+                        && (coo.GetRight(i) >= 0)
+                        )
+                    {
+                        int coordinate = coo.GetRight(i);
+                        maskSpan[coo.GetRight(i)] = true;
+                    }
                 }
             }
 
@@ -189,15 +223,46 @@ class Program
 
         public int GetUp(int flatCoordinate)
         {
-            int x = (flatCoordinate ) % 128;
-            int y = (flatCoordinate ) / 128;
+            int x = (flatCoordinate) % 128;
+            int y = (flatCoordinate) / 128;
 
             y--;
-            if (y >= worldsizeY || y < 0) 
+            if (y >= worldsizeY || y < 0)
                 return -1;
 
-            return y * worldSizeX  + x;
+            return y * worldSizeX + x;
         }
 
+        public int GetDown(int flatCoordinate)
+        {
+            int x = (flatCoordinate) % 128;
+            int y = (flatCoordinate) / 128;
+
+            y++;
+            if (y >= worldsizeY || y < 0)
+                return -1;
+
+            return y * worldSizeX + x;
+        }
+        public int GetLeft(int flatCoordinate)
+        {
+            int x = (flatCoordinate) % 128;
+            int y = (flatCoordinate) / 128;
+
+            x--;
+            if (x < 0) x += worldSizeX;
+
+            return y * worldSizeX + x;
+        }
+        public int GetRight(int flatCoordinate)
+        {
+            int x = (flatCoordinate) % 128;
+            int y = (flatCoordinate) / 128;
+
+            x++;
+            if (x >= worldSizeX) x =0;
+
+            return y * worldSizeX + x;
+        }
     }
 }
