@@ -28,7 +28,7 @@ class Program
 
         //инициализируем и запустим алгоритм
         WaveAlgorithm algorithm = new WaveAlgorithm(worldXSize, worldYSize);
-        algorithm.CalculateMask();
+        algorithm.CalculateMask(world.memory);
 
         // Вывод содержимого mask  
         Console.WriteLine("Исходный mask:");
@@ -154,9 +154,10 @@ class Program
             }
         }
 
-        public void CalculateMask()
+        public void CalculateMask(Memory<bool> world)
         {
             this.AddBedrockToMask();
+            //Сотрим ячейки выше маски ( не смещать маску , а сместить адресацию )
         }
 
     }
