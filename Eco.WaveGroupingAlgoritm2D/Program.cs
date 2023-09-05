@@ -28,7 +28,7 @@ class Program
 
         //инициализируем и запустим алгоритм
         WaveAlgorithm algorithm = new WaveAlgorithm(worldXSize, worldYSize);
-        algorithm.CalculateMask(world.memory);
+        algorithm.CalculateMask(world);
 
         // Вывод содержимого mask  
         Console.WriteLine("Исходный mask:");
@@ -56,17 +56,6 @@ class Program
         //Сдвиг маски влево
         //Сдвиг маски вниз
         //Сдвиг маски вправо
-    }
-
-    static void ApplyMaskToWorld(Memory<bool> world, Memory<bool> mask)
-    {
-        Span<bool> worldSpan = world.Span;
-        Span<bool> maskSpan = mask.Span;
-
-        for (int i = 0; i < worldSpan.Length; i++)
-        {
-            worldSpan[i] &= maskSpan[i];
-        }
     }
 
     static void PrintMemoryInBlocks(ReadOnlySpan<bool> data, int blockSize)
@@ -154,10 +143,21 @@ class Program
             }
         }
 
-        public void CalculateMask(Memory<bool> world)
+        public void CalculateMask(World worldClass)
         {
+            Memory<bool> world = worldClass.memory;
+            coordinateHelper coo = new coordinateHelper(worldClass.worldSizeX, worldClass.worldSizeY);
+
             this.AddBedrockToMask();
-            //Сотрим ячейки выше маски ( не смещать маску , а сместить адресацию )
+            //Сотрим ячейки выше маски ( не смещать маску , а сместить адресацию маски)
+            //дополнить маску но по адрессу без смешения
+            Span<bool> worldSpan = world.Span;
+            Span<bool> maskSpan = mask.Span;
+
+            for (int i = 0; i < worldSpan.Length; i++)
+            {
+                worldSpan[i] &= maskSpan[i];
+            }
         }
 
     }
