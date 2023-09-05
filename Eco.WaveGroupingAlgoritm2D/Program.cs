@@ -31,11 +31,11 @@ class Program
         algorithm.CalculateMask(world);
 
         // Вывод содержимого mask  
-        Console.WriteLine("Исходный mask:");
+        Console.WriteLine("Измененная mask:");
         if (!dontPrintMemory) PrintMemoryInBlocks(algorithm.mask.Span, worldXSize);
 
         // Вывод содержимого memory блоками 
-        Console.WriteLine("Измененная память:");
+        Console.WriteLine("Измененная world:");
         if (!dontPrintMemory) PrintMemoryInBlocks(world.memory.Span, worldXSize);
     }
 
@@ -152,12 +152,26 @@ class Program
             //Сотрим ячейки выше маски ( не смещать маску , а сместить адресацию маски)
             //дополнить маску но по адрессу без смешения
             Span<bool> worldSpan = world.Span;
-            Span<bool> maskSpan = mask.Span;
+            Span<bool> maskSpan = this.mask.Span;
 
-            for (int i = 0; i < worldSpan.Length; i++)
+            for (int t = 0; t < 15; t++)
             {
-                worldSpan[i] &= maskSpan[i];
+
+
+                for (int i = 0; i < worldSpan.Length; i++)
+                {
+                    if (worldSpan[i] && maskSpan[i]
+                        && (coo.GetUp(i) >= 0)
+                        )
+                    {
+                        int coordinate = coo.GetUp(i);
+                        maskSpan[coo.GetUp(i)] = true;
+                    }
+                    //worldSpan[i] &= maskSpan[i];
+                }
             }
+
+
         }
 
     }
@@ -173,7 +187,17 @@ class Program
             this.worldsizeY = worldsizeY;
         }
 
+        public int GetUp(int flatCoordinate)
+        {
+            int x = (flatCoordinate ) % 128;
+            int y = (flatCoordinate ) / 128;
 
+            y--;
+            if (y >= worldsizeY || y < 0) 
+                return -1;
+
+            return y * worldSizeX  + x;
+        }
 
     }
 }
